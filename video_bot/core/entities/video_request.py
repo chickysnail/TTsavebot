@@ -7,8 +7,13 @@ from urllib.parse import urlparse
 from video_bot.core.entities.enums import PlatformType
 from video_bot.core.errors import ValidationError
 
-_TIKTOK_HOSTS = {"tiktok.com", "www.tiktok.com", "vm.tiktok.com"}
-_INSTAGRAM_HOSTS = {"instagram.com", "www.instagram.com"}
+
+def _is_tiktok_host(host: str) -> bool:
+    return host == "tiktok.com" or host.endswith(".tiktok.com")
+
+
+def _is_instagram_host(host: str) -> bool:
+    return host == "instagram.com" or host.endswith(".instagram.com")
 
 
 def detect_platform(raw_url: str) -> PlatformType:
@@ -20,10 +25,10 @@ def detect_platform(raw_url: str) -> PlatformType:
     if parsed.scheme not in {"http", "https"} or not host:
         raise ValidationError("Отправьте корректную ссылку на TikTok или Instagram.")
 
-    if host in _TIKTOK_HOSTS:
+    if _is_tiktok_host(host):
         return PlatformType.TIKTOK
 
-    if host in _INSTAGRAM_HOSTS and (path.startswith("/reel/") or path.startswith("/p/")):
+    if _is_instagram_host(host) and (path.startswith("/reel/") or path.startswith("/p/")):
         return PlatformType.INSTAGRAM
 
     raise ValidationError("Поддерживаются только TikTok и Instagram Reels/Post ссылки.")
@@ -44,4 +49,3 @@ class VideoRequest:
             platform=detect_platform(url),
             requested_at=datetime.utcnow(),
         )
-

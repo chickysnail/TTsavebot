@@ -1,6 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import importlib.util
+import os
+import shlex
+import shutil
+import sys
 from pathlib import Path
 from uuid import uuid4
 
@@ -22,13 +27,27 @@ class YtDlpDownloader(IVideoDownloaderService):
         self._timeout_seconds = timeout_seconds
         self._cookies_path = cookies_path
 
-    async def download(self, url: str) -> DownloadedVideo:
-        request_dir = self._downloads_dir / str(uuid4())
-        request_dir.mkdir(parents=True, exist_ok=True)
-        output_template = request_dir / "%(id)s.%(ext)s"
+    def _resolve_command(self) -> list[str]:
+        configured = self._ytdlp_bin.strip()
+        if configured:
+            parts = shlex.split(configured, posix=os.name != "nt")
+            if parts and shutil.which(parts[0]):
+                return parts
 
+        if importlib.util.find_spec("yt_dlp") is not None:
+            return [sys.executable, "-m", "yt_dlp"]
+
+        if configured:
+            raise DownloaderError(
+                f"Downloader '{configured}' не найден. Установите yt-dlp или укажите корректный YTDLP_BIN."
+            )
+
+        raise DownloaderError("yt-dlp не установлен. Выполните `uv sync` или укажите путь в YTDLP_BIN.")
+
+    def _build_command(self, url: str, output_template: Path) -> list[str]:
         command = [
-            self._ytdlp_bin,
+            *self._resolve_command(),
+            "--no-simulate",
             "--no-playlist",
             "--restrict-filenames",
             "--merge-output-format",
@@ -45,6 +64,14 @@ class YtDlpDownloader(IVideoDownloaderService):
         if self._cookies_path and self._cookies_path.exists():
             command[1:1] = ["--cookies", str(self._cookies_path)]
 
+        return command
+
+    async def download(self, url: str) -> DownloadedVideo:
+        request_dir = self._downloads_dir / str(uuid4())
+        request_dir.mkdir(parents=True, exist_ok=True)
+        output_template = request_dir / "%(id)s.%(ext)s"
+        command = self._build_command(url, output_template)
+
         try:
             process = await asyncio.create_subprocess_exec(
                 *command,
@@ -54,10 +81,14 @@ class YtDlpDownloader(IVideoDownloaderService):
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=self._timeout_seconds)
         except asyncio.TimeoutError as exc:
             raise DownloadTimeoutError("Время ожидания скачивания истекло.") from exc
+        except FileNotFoundError as exc:
+            raise DownloaderError("yt-dlp не найден. Выполните `uv sync` или укажите корректный YTDLP_BIN.") from exc
 
         if process.returncode != 0:
             message = stderr.decode("utf-8", errors="ignore").strip() or stdout.decode("utf-8", errors="ignore").strip()
             lowered = message.lower()
+            if "no module named yt_dlp" in lowered:
+                raise DownloaderError("yt-dlp не установлен в окружении. Выполните `uv sync`.")
             if "login required" in lowered or "private" in lowered:
                 raise PrivateContentError("Видео недоступно без авторизации или аккаунт приватный.")
             if "unsupported url" in lowered or "invalid url" in lowered:
@@ -81,4 +112,3 @@ class YtDlpDownloader(IVideoDownloaderService):
             title=title,
             extractor_id=extractor_id,
         )
-
