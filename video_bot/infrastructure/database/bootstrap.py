@@ -6,7 +6,7 @@ from video_bot.infrastructure.database.sqlite import SQLiteDatabase
 
 
 async def initialize_database(database: SQLiteDatabase) -> None:
-    async with await database.connect() as connection:
+    async with database.connect() as connection:
         await connection.executescript(
             """
             CREATE TABLE IF NOT EXISTS users (
@@ -40,4 +40,3 @@ async def sync_superadmins(access_repository: IAccessRepository, superadmins: tu
 
 async def trim_logs(log_repository: IDownloadLogRepository, limit: int) -> None:
     await log_repository.trim_to_limit(limit)
-

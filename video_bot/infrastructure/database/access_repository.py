@@ -26,7 +26,7 @@ class SQLiteAccessRepository(IAccessRepository):
         self._database = database
 
     async def get_user(self, telegram_id: int) -> User | None:
-        async with await self._database.connect() as connection:
+        async with self._database.connect() as connection:
             cursor = await connection.execute(
                 """
                 SELECT telegram_id, role, is_active, created_at, updated_at
@@ -40,7 +40,7 @@ class SQLiteAccessRepository(IAccessRepository):
 
     async def upsert_user(self, telegram_id: int, role: UserRole) -> User:
         now = _now_iso()
-        async with await self._database.connect() as connection:
+        async with self._database.connect() as connection:
             await connection.execute(
                 """
                 INSERT INTO users (telegram_id, role, is_active, created_at, updated_at)
@@ -59,7 +59,7 @@ class SQLiteAccessRepository(IAccessRepository):
         return user
 
     async def deactivate_user(self, telegram_id: int) -> None:
-        async with await self._database.connect() as connection:
+        async with self._database.connect() as connection:
             await connection.execute(
                 """
                 UPDATE users
@@ -71,7 +71,7 @@ class SQLiteAccessRepository(IAccessRepository):
             await connection.commit()
 
     async def list_active_users(self) -> list[User]:
-        async with await self._database.connect() as connection:
+        async with self._database.connect() as connection:
             cursor = await connection.execute(
                 """
                 SELECT telegram_id, role, is_active, created_at, updated_at

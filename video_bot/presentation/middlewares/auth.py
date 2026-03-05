@@ -4,7 +4,7 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from aiogram import BaseMiddleware
-from aiogram.types import CallbackQuery, Message, TelegramObject
+from aiogram.types import TelegramObject
 
 from video_bot.containers import AppContainer
 
@@ -33,16 +33,12 @@ class AuthMiddleware(BaseMiddleware):
         return await handler(event, data)
 
     async def _log_rejection(self, telegram_id: int, event: TelegramObject) -> None:
-        payload = ""
+        payload = "<empty>"
         platform = None
-        if isinstance(event, Message):
-            payload = event.text or event.caption or "<empty>"
-            try:
-                platform = None
-            except Exception:
-                platform = None
-        elif isinstance(event, CallbackQuery):
-            payload = f"callback:{event.data}"
+        if getattr(event, "text", None) or getattr(event, "caption", None):
+            payload = getattr(event, "text", None) or getattr(event, "caption", None) or "<empty>"
+        elif getattr(event, "data", None):
+            payload = f"callback:{getattr(event, 'data')}"
 
         log_id = await self._container.download_log_repository.create_log(
             telegram_id=telegram_id,
@@ -54,8 +50,12 @@ class AuthMiddleware(BaseMiddleware):
 
     @staticmethod
     async def _deny(event: TelegramObject) -> None:
-        if isinstance(event, Message):
-            await event.answer("Доступ запрещён.")
-        elif isinstance(event, CallbackQuery):
-            await event.answer("Доступ запрещён.", show_alert=True)
+        answer = getattr(event, "answer", None)
+        if answer is None:
+            return
 
+        if getattr(event, "data", None) is not None:
+            await answer("Доступ запрещён.", show_alert=True)
+            return
+
+        await answer("Доступ запрещён.")

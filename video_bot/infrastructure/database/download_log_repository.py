@@ -31,7 +31,7 @@ class SQLiteDownloadLogRepository(IDownloadLogRepository):
         self._database = database
 
     async def create_log(self, telegram_id: int, url: str, platform: PlatformType | None) -> int:
-        async with await self._database.connect() as connection:
+        async with self._database.connect() as connection:
             cursor = await connection.execute(
                 """
                 INSERT INTO download_logs (telegram_id, url, platform, status, created_at)
@@ -55,7 +55,7 @@ class SQLiteDownloadLogRepository(IDownloadLogRepository):
         await self._mark(log_id, DownloadStatus.OVERSIZE, file_size_bytes=file_size_bytes, error_message=error_message)
 
     async def get_recent(self, limit: int) -> list[DownloadLogRecord]:
-        async with await self._database.connect() as connection:
+        async with self._database.connect() as connection:
             cursor = await connection.execute(
                 """
                 SELECT id, telegram_id, url, platform, status, error_message, file_size_bytes, created_at, completed_at
@@ -69,7 +69,7 @@ class SQLiteDownloadLogRepository(IDownloadLogRepository):
             return [_parse_record(row) for row in rows]
 
     async def get_stats(self) -> DownloadStats:
-        async with await self._database.connect() as connection:
+        async with self._database.connect() as connection:
             cursor = await connection.execute(
                 """
                 SELECT
@@ -95,7 +95,7 @@ class SQLiteDownloadLogRepository(IDownloadLogRepository):
             )
 
     async def trim_to_limit(self, limit: int) -> None:
-        async with await self._database.connect() as connection:
+        async with self._database.connect() as connection:
             await connection.execute(
                 """
                 DELETE FROM download_logs
@@ -118,7 +118,7 @@ class SQLiteDownloadLogRepository(IDownloadLogRepository):
         file_size_bytes: int | None = None,
         error_message: str | None = None,
     ) -> None:
-        async with await self._database.connect() as connection:
+        async with self._database.connect() as connection:
             await connection.execute(
                 """
                 UPDATE download_logs
@@ -128,4 +128,3 @@ class SQLiteDownloadLogRepository(IDownloadLogRepository):
                 (status.value, error_message, file_size_bytes, _now_iso(), log_id),
             )
             await connection.commit()
-

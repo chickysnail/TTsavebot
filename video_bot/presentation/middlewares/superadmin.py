@@ -4,7 +4,7 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from aiogram import BaseMiddleware
-from aiogram.types import CallbackQuery, Message, TelegramObject
+from aiogram.types import TelegramObject
 
 from video_bot.core.entities import User
 
@@ -18,11 +18,11 @@ class SuperadminMiddleware(BaseMiddleware):
     ) -> Any:
         current_user: User | None = data.get("current_user")
         if current_user is None or not current_user.is_superadmin:
-            if isinstance(event, Message):
-                await event.answer("Команда доступна только супер-админам.")
-            elif isinstance(event, CallbackQuery):
-                await event.answer("Недостаточно прав.", show_alert=True)
+            answer = getattr(event, "answer", None)
+            if answer is not None and getattr(event, "data", None) is not None:
+                await answer("Недостаточно прав.", show_alert=True)
+            elif answer is not None:
+                await answer("Команда доступна только супер-админам.")
             return None
 
         return await handler(event, data)
-
