@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "📘 Read the project documentation"
+    url: https://github.com/AmaLS367/TTsavebot#readme
+    about: Check setup, configuration, Docker, and supported workflow details before opening an issue.
+  - name: "❤️ Support via GitHub Sponsors"
+    url: https://github.com/sponsors/AmaLS367
+    about: Support ongoing work on TTsavebot.

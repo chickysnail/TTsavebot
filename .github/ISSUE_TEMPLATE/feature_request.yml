@@ -1,0 +1,55 @@
+name: "✨ Feature Request"
+description: Propose a focused improvement with a clear use case.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched existing issues and this request is not already covered.
+          required: true
+        - label: This is a concrete product or developer workflow improvement, not a vague idea.
+          required: true
+  - type: input
+    id: summary
+    attributes:
+      label: Feature summary
+      description: Keep it short and specific.
+      placeholder: Add a command to show the current whitelist count.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem it solves
+      description: Explain the gap first.
+      placeholder: Superadmins can list users, but there is no quick way to see whitelist size during routine checks.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the change you want to see.
+      placeholder: Add a lightweight admin command or panel item that shows active whitelist count and superadmin count.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional, but useful when there is more than one path.
+      placeholder: Reusing /logs is possible, but it is noisy and does not solve the quick-check use case.
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Constraints, examples, related links, or edge cases.
+      placeholder: This matters mostly for private deployments where admins rely on Telegram-only operations.
+    validations:
+      required: false

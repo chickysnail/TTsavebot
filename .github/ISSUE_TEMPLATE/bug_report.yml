@@ -1,0 +1,106 @@
+name: "🐞 Bug Report"
+description: Report a reproducible issue with downloads, access control, admin flows, or runtime behavior.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched existing issues and did not find the same problem.
+          required: true
+  - type: input
+    id: summary
+    attributes:
+      label: Short bug summary
+      description: One clear sentence.
+      placeholder: Download fails for Instagram Reel links when cookies are configured.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Pick the closest area.
+      options:
+        - Download flow
+        - Access control
+        - Admin commands
+        - Logging or stats
+        - Docker or deployment
+        - Configuration
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: source_link
+    attributes:
+      label: Source link or platform context
+      description: Add the media link, platform, or a short note if the issue is link-specific.
+      placeholder: https://www.instagram.com/reel/... or "TikTok short links only"
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Keep it concrete and repeatable.
+      placeholder: |
+        1. Start the bot with .env from the repo root
+        2. Send the link to the bot
+        3. Wait for the progress message
+        4. Observe the failure
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: The bot should download the media and send the video back to Telegram.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: The bot returns a private-content style error even though the media is public.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or traceback
+      description: Paste the relevant part only.
+      placeholder: |
+        2026-03-09 12:34:56 | ERROR | ...
+        Traceback (most recent call last):
+        ...
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Runtime details that matter.
+      placeholder: |
+        OS: Windows 11
+        Python: 3.13
+        Run mode: uv / Docker
+        yt-dlp: project environment
+        Cookies: yes / no
+        Telegram bot: local polling
+      render: markdown
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version, tag, or commit
+      description: If known.
+      placeholder: main, v0.1.0, or a commit SHA
+    validations:
+      required: false
