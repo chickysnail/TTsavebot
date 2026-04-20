@@ -103,7 +103,7 @@ async def test_auth_middleware_denies_unknown_user() -> None:
 
     assert handler_called is False
     assert event.answers == ["Доступ запрещён."]
-    assert log_repository.rejected == [(1, "Пользователь не в whitelist.")]
+    assert log_repository.rejected == [(1, "Пользователь в blacklist.")]
 
 
 @pytest.mark.asyncio

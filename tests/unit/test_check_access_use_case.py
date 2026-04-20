@@ -16,15 +16,24 @@ class FakeAccessRepository(IAccessRepository):
         return self.user
 
     async def upsert_user(self, telegram_id: int, role: UserRole) -> User:
-        if self.user is None:
-            raise RuntimeError("No user configured")
-        return self.user
+        new_user = User(
+            telegram_id=telegram_id,
+            role=role,
+            is_active=True,
+            created_at=datetime.now(tz=timezone.utc),
+            updated_at=datetime.now(tz=timezone.utc),
+        )
+        self.user = new_user
+        return new_user
 
     async def deactivate_user(self, telegram_id: int) -> None:
         return None
 
     async def list_active_users(self) -> list[User]:
-        return [self.user] if self.user is not None else []
+        return [self.user] if self.user is not None and self.user.is_active else []
+
+    async def list_inactive_users(self) -> list[User]:
+        return [self.user] if self.user is not None and not self.user.is_active else []
 
 
 @pytest.mark.asyncio
@@ -60,9 +69,11 @@ async def test_check_access_returns_none_for_inactive_user() -> None:
 
 
 @pytest.mark.asyncio
-async def test_check_access_returns_none_when_user_not_found() -> None:
+async def test_check_access_auto_creates_unknown_user() -> None:
     use_case = CheckAccessUseCase(FakeAccessRepository(user=None))
 
     result = await use_case.execute(telegram_id=99)
 
-    assert result is None
+    assert result is not None
+    assert result.telegram_id == 99
+    assert result.is_active is True
