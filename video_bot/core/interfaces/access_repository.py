@@ -22,3 +22,7 @@ class IAccessRepository(ABC):
     async def list_active_users(self) -> list[User]:
         raise NotImplementedError
 
+    @abstractmethod
+    async def list_inactive_users(self) -> list[User]:
+        raise NotImplementedError
+

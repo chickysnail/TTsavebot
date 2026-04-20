@@ -45,7 +45,7 @@ class AuthMiddleware(BaseMiddleware):
             url=payload,
             platform=platform,
         )
-        await self._container.download_log_repository.mark_rejected(log_id, "Пользователь не в whitelist.")
+        await self._container.download_log_repository.mark_rejected(log_id, "Пользователь в blacklist.")
         await self._container.download_log_repository.trim_to_limit(self._container.settings.log_retention_limit)
 
     @staticmethod

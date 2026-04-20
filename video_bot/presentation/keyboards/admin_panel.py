@@ -8,16 +8,16 @@ def build_admin_panel_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(text="Статистика", callback_data="panel:stats")
     builder.button(text="Последние логи", callback_data="panel:logs")
-    builder.button(text="Whitelist", callback_data="panel:whitelist")
+    builder.button(text="Blacklist", callback_data="panel:blacklist")
     builder.adjust(1)
     return builder.as_markup()
 
 
-def build_whitelist_keyboard() -> InlineKeyboardMarkup:
+def build_blacklist_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.button(text="Добавить ID", callback_data="panel:allow")
-    builder.button(text="Удалить ID", callback_data="panel:deny")
-    builder.button(text="Список пользователей", callback_data="panel:users")
+    builder.button(text="Заблокировать ID", callback_data="panel:deny")
+    builder.button(text="Разблокировать ID", callback_data="panel:allow")
+    builder.button(text="Список заблокированных", callback_data="panel:users")
     builder.button(text="Назад", callback_data="panel:back")
     builder.adjust(1)
     return builder.as_markup()

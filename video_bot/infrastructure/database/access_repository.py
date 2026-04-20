@@ -84,3 +84,16 @@ class SQLiteAccessRepository(IAccessRepository):
             )
             rows = await cursor.fetchall()
             return [_parse_user(row) for row in rows]
+
+    async def list_inactive_users(self) -> list[User]:
+        async with self._database.connect() as connection:
+            cursor = await connection.execute(
+                """
+                SELECT telegram_id, role, is_active, created_at, updated_at
+                FROM users
+                WHERE is_active = 0
+                ORDER BY telegram_id ASC
+                """
+            )
+            rows = await cursor.fetchall()
+            return [_parse_user(row) for row in rows]
